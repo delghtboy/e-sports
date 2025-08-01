@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Free Fire Tournament</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 50px auto;
+      background: #1e293b;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #60a5fa;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background-color: #0f172a;
+      color: white;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+    }
+
+    .btn {
+      width: 100%;
+      background-color: #3b82f6;
+      color: white;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #2563eb;
+    }
+
+    #msg {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #334155;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1e293b;
+      color: #60a5fa;
+    }
+
+    td {
+      background-color: #0f172a;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .nav-buttons button {
+      flex: 1;
+      margin: 0 10px;
+      background-color: #0ea5e9;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .nav-buttons button:hover {
+      background-color: #0284c7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-buttons">
+      <button onclick="showSection('registration')">🏆 Registration</button>
+      <button onclick="showSection('admin')">🛠 Admin Panel</button>
+    </div>
+
+    <!-- Registration Form -->
+    <section id="registration">
+      <h2 class="section-title"><i class="fas fa-user-plus"></i> Tournament Registration</h2>
+      <form id="regForm">
+        <div class="form-group">
+          <label for="name">In Game Name (SET THE NAME CLEARLY)</label>
+          <input type="text" id="name" />
+        </div>
+        <div class="form-group">
+          <label for="uid">Free Fire UID</label>
+          <input type="text" id="uid" />
+        </div>
+        <div class="form-group">
+          <label for="teamName">Team Name</label>
+          <input type="text" id="teamName" />
+        </div>
+        <div class="form-group">
+          <label for="teamMembers">Team Members (Comma-separated)</label>
+          <input type="text" id="teamMembers" />
+        </div>
+        <button type="submit" class="btn">Register / Update</button>
+        <div id="msg"></div>
+      </form>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="admin" style="display:none">
+      <h2 class="section-title"><i class="fas fa-cogs"></i> Admin Panel</h2>
+      <table id="playerTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>UID</th>
+            <th>Team</th>
+            <th>Members</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    const adminPassword = "admin123"; // Change this for security
+    const form = document.getElementById("regForm");
+    const nameInput = document.getElementById("name");
+    const uidInput = document.getElementById("uid");
+    const teamNameInput = document.getElementById("teamName");
+    const teamMembersInput = document.getElementById("teamMembers");
+    const msg = document.getElementById("msg");
+    const tableBody = document.querySelector("#playerTable tbody");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      let currentUID = localStorage.getItem("currentUID");
+      let players = JSON.parse(localStorage.getItem("players")) || [];
+
+      if (currentUID) {
+        const player = players.find(p => p.uid === currentUID);
+        if (player) {
+          nameInput.value = player.name;
+          uidInput.value = player.uid;
+          teamNameInput.value = player.teamName;
+          teamMembersInput.value = player.teamMembers;
+          uidInput.disabled = true;
+          msg.textContent = "You have already registered. You can update your info.";
+        }
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        const uid = uidInput.value.trim();
+        const teamName = teamNameInput.value.trim();
+        const teamMembers = teamMembersInput.value.trim();
+
+        if (!name || !uid || !teamName || !teamMembers) {
+          msg.textContent = "All fields are required.";
+          msg.style.color = "#f87171";
+          return;
+        }
+
+        let players = JSON.parse(localStorage.getItem("players")) || [];
+        let playerIndex = players.findIndex(p => p.uid === uid);
+
+        if (playerIndex !== -1) {
+          players[playerIndex] = { name, uid, teamName, teamMembers };
+          msg.textContent = "Information updated!";
+        } else {
+          players.push({ name, uid, teamName, teamMembers });
+          msg.textContent = "Registered successfully!";
+        }
+
+        localStorage.setItem("players", JSON.stringify(players));
+        localStorage.setItem("currentUID", uid);
+        msg.style.color = "#22c55e";
+        loadPlayers();
+      });
+
+      loadPlayers(); // Load admin panel table if needed
+    });
+
+    function loadPlayers() {
+      const players = JSON.parse(localStorage.getItem("players")) || [];
+      tableBody.innerHTML = "";
+      players.forEach((player, index) => {
+        const row = `<tr>
+          <td>${index + 1}</td>
+          <td>${player.name}</td>
+          <td>${player.uid}</td>
+          <td>${player.teamName}</td>
+          <td>${player.teamMembers}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+    }
+
+    function showSection(id) {
+      if (id === "admin") {
+        const input = prompt("Enter admin password:");
+        if (input !== adminPassword) {
+          alert("❌ Incorrect password. Access denied.");
+          return;
+        }
+      }
+
+      document.getElementById("registration").style.display = id === "registration" ? "block" : "none";
+      document.getElementById("admin").style.display = id === "admin" ? "block" : "none";
+      if (id === "admin") loadPlayers();
+    }
+  </script>
+</body>
+</html>
