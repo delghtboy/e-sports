@@ -40,7 +40,9 @@
       color: #cbd5e1;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
       width: 100%;
       padding: 10px 14px;
       border-radius: 8px;
@@ -140,6 +142,14 @@
           <input type="text" id="name" />
         </div>
         <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" />
+        </div>
+        <div class="form-group">
           <label for="uid">Free Fire UID</label>
           <input type="text" id="uid" />
         </div>
@@ -164,6 +174,8 @@
           <tr>
             <th>#</th>
             <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
             <th>UID</th>
             <th>Team</th>
             <th>Members</th>
@@ -178,6 +190,8 @@
     const adminPassword = "admin123"; // Change this for security
     const form = document.getElementById("regForm");
     const nameInput = document.getElementById("name");
+    const phoneInput = document.getElementById("phone");
+    const emailInput = document.getElementById("email");
     const uidInput = document.getElementById("uid");
     const teamNameInput = document.getElementById("teamName");
     const teamMembersInput = document.getElementById("teamMembers");
@@ -192,6 +206,8 @@
         const player = players.find(p => p.uid === currentUID);
         if (player) {
           nameInput.value = player.name;
+          phoneInput.value = player.phone;
+          emailInput.value = player.email;
           uidInput.value = player.uid;
           teamNameInput.value = player.teamName;
           teamMembersInput.value = player.teamMembers;
@@ -203,11 +219,13 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const name = nameInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const email = emailInput.value.trim();
         const uid = uidInput.value.trim();
         const teamName = teamNameInput.value.trim();
         const teamMembers = teamMembersInput.value.trim();
 
-        if (!name || !uid || !teamName || !teamMembers) {
+        if (!name || !phone || !email || !uid || !teamName || !teamMembers) {
           msg.textContent = "All fields are required.";
           msg.style.color = "#f87171";
           return;
@@ -216,11 +234,13 @@
         let players = JSON.parse(localStorage.getItem("players")) || [];
         let playerIndex = players.findIndex(p => p.uid === uid);
 
+        const playerData = { name, phone, email, uid, teamName, teamMembers };
+
         if (playerIndex !== -1) {
-          players[playerIndex] = { name, uid, teamName, teamMembers };
+          players[playerIndex] = playerData;
           msg.textContent = "Information updated!";
         } else {
-          players.push({ name, uid, teamName, teamMembers });
+          players.push(playerData);
           msg.textContent = "Registered successfully!";
         }
 
@@ -240,6 +260,8 @@
         const row = `<tr>
           <td>${index + 1}</td>
           <td>${player.name}</td>
+          <td>${player.phone}</td>
+          <td>${player.email}</td>
           <td>${player.uid}</td>
           <td>${player.teamName}</td>
           <td>${player.teamMembers}</td>
